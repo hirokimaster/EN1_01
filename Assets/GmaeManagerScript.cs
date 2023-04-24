@@ -4,55 +4,85 @@ using UnityEngine;
 
 public class GmaeManagerScript : MonoBehaviour
 {
+    // 追加
+    public GameObject playerPrefab;
+    public GameObject BoxPrefab;
 
-    //配列の宣言
-    int[]map;
+    // レベルデザイン用の配列
+    int[,]map;
+
+    // ゲーム管理用の配列
+    GameObject[,] field;
 
 
     //クラスの中、メソッドの外に書くこと！
-    void PrintArray()
-    {
-        string debugText = "";
+     void PrintArray()
+     {
+        // 使わない
 
-        for (int i = 0; i < map.Length; i++)
-        {
-            debugText += map[i].ToString() + ",";
-        }
+        /* string debugText = "";
 
-        Debug.Log(debugText);
-    }
+         for (int i = 0; i < map.Length; i++)
+         {
+             debugText += map[i].ToString() + ",";
+         }
 
-    //返り値の型に注意
-    int GetPlayerIndex()
-    {
-        for(int i=0; i<map.Length; i++)
-        {
-            if (map[i] == 1)
+         Debug.Log(debugText);*/
+     }
+
+     //返り値の型に注意
+     Vector2Int GetPlayerIndex()
+     {
+        // mapからfieldに変えて二次元配列に対応させた
+         for(int i = 0; i < field.GetLength(0); i++)
+         {
+            for(int j = 0; j < field.GetLength(1); j++)
             {
-                return i;
-            }
-        }
-        return -1;
-    }
+                // まずnullチェックしてnullならcontinueを使い
+                // ループを続ける。null出なかったらtagチェック
+                if (field[i,j] == null)
+                {
+                    continue;
 
-    //返り値の方に注意
-    bool MoveNumber(int number,int moveFrom,int moveTo)
-    {
-        if(moveTo < 0 ||  moveTo >= map.Length)
+                }
+                
+                // それぞれVector2Int型で返す
+                else if (field[i,j].tag == "Player")
+                {
+                    return new Vector2Int(i, j);
+                }
+
+            }
+            
+         }
+         // それぞれの値をそれぞれ-1としたVector2Int型で返す
+         return new Vector2Int(-1,-1);
+     }
+
+     //返り値の方に注意
+     bool MoveNumber(string tag,Vector2Int moveFrom,Vector2Int moveTo)
+     {
+        if (moveTo.y < 0 || moveTo.y >= field.GetLength(0))
         {
-            //動けない条件を先に書き、リターンする。早期リターン
-            //移動先が範囲外なら移動不可
+             //動けない条件を先に書き、リターンする。早期リターン
+             //移動先が範囲外なら移動不可
+             return false;
+        }
+
+        // 追加
+        if(moveTo.x < 0 || moveTo.x >= field.GetLength(1))
+        {
             return false;
         }
 
         //移動先に2（箱）がいたら
-        if (map[moveTo] == 2)
+        if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
         {
             //どの方向へ移動するか
-            int velocity = moveTo - moveFrom;
+            Vector2Int velocity = moveTo - moveFrom;
             //プレイヤーの移動先から、さらに先に2（箱）を移動
             //箱の移動処理
-            bool success = MoveNumber(2, moveTo, moveTo + velocity);
+            bool success = MoveNumber(tag, moveTo, moveTo + velocity);
             //もし箱が移動失敗したら、プレイヤーも失敗
             if (!success)
             {
@@ -60,25 +90,61 @@ public class GmaeManagerScript : MonoBehaviour
             }
         }
 
-        map[moveTo] = number;
-        map[moveFrom] = 0;
-        return true;
-    }
+         field[moveFrom.y, moveFrom.x].transform.position = new Vector3(moveTo.x, field.GetLength(0) - moveTo.y, 0);
+         field[moveTo.y,moveTo.x] = field[moveFrom.y,moveFrom.x];
+         field[moveFrom.y,moveFrom.x] = null;
+         return true;
+     }
 
-
+     
 
     // Start is called before the first frame update
     void Start()
     {
+
+
+
         //配列の実態の作成と初期化
-        map = new int[] { 0, 0, 0, 1, 0, 2, 0, 0, 0 };
-        PrintArray();
-       
+        // 追加と変更
+        map = new int[,]
+        {
+
+        {0,0,0,0,0 },
+        {0,0,0,0,0 },
+        {0,0,0,0,1 },
+
+        };
+
+        field = new GameObject[map.GetLength(0),map.GetLength(1)];
+
+        string debugText = "";
+
+        for (int y = 0; y < map.GetLength(0); y++)
+        {
+            for (int x = 0; x < map.GetLength(1); x++)
+            {
+                debugText += map[y, x].ToString() + ",";
+
+                if (map[y,x] == 1)
+                {
+                    // GameObject instance = // 書き換え
+                    field[y,x] = Instantiate(playerPrefab,new Vector3(x, map.GetLength(1) - y,0), Quaternion.identity);
+                }
+
+            }
+
+            debugText += "\n";
+        }
+
+        Debug.Log(debugText);
+
+        //PrintArray();
+        
 
     }
 
     // Update is called once per frame
-    void Update()
+    /*void Update()
     {
 
         //右移動
@@ -92,5 +158,6 @@ public class GmaeManagerScript : MonoBehaviour
             PrintArray();   
         }
 
-    }
+    }*/
+   
 }
