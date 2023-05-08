@@ -6,7 +6,7 @@ public class GmaeManagerScript : MonoBehaviour
 {
     // 追加
     public GameObject playerPrefab;
-    public GameObject BoxPrefab;
+    public GameObject boxPrefab;
 
     // レベルデザイン用の配列
     int[,]map;
@@ -16,19 +16,20 @@ public class GmaeManagerScript : MonoBehaviour
 
 
     //クラスの中、メソッドの外に書くこと！
-     void PrintArray()
+     /*void PrintArray()
      {
         // 使わない
 
-        /* string debugText = "";
+         string debugText = "";
 
          for (int i = 0; i < map.Length; i++)
          {
              debugText += map[i].ToString() + ",";
          }
 
-         Debug.Log(debugText);*/
-     }
+         Debug.Log(debugText);
+     }*/
+
 
      //返り値の型に注意
      Vector2Int GetPlayerIndex()
@@ -49,7 +50,7 @@ public class GmaeManagerScript : MonoBehaviour
                 // それぞれVector2Int型で返す
                 else if (field[i,j].tag == "Player")
                 {
-                    return new Vector2Int(i, j);
+                    return new Vector2Int(j, i);
                 }
 
             }
@@ -109,9 +110,11 @@ public class GmaeManagerScript : MonoBehaviour
         map = new int[,]
         {
 
-        {0,0,0,0,0 },
-        {0,0,0,0,0 },
-        {0,0,0,0,1 },
+        {0,0,0,0,1,0,0,0 },
+        {0,0,2,0,0,0,0,0 },
+        {0,0,0,2,0,2,0,0 },
+        {0,0,0,0,0,0,0,0 },
+        {0,0,0,0,0,0,0,0 },
 
         };
 
@@ -125,10 +128,15 @@ public class GmaeManagerScript : MonoBehaviour
             {
                 debugText += map[y, x].ToString() + ",";
 
-                if (map[y,x] == 1)
+                if (map[y, x] == 1)
                 {
                     // GameObject instance = // 書き換え
-                    field[y,x] = Instantiate(playerPrefab,new Vector3(x, map.GetLength(1) - y,0), Quaternion.identity);
+                    field[y, x] = Instantiate(playerPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
+                }
+                else if (map[y, x] == 2)
+                {
+                    field[y, x] = Instantiate(boxPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
+
                 }
 
             }
@@ -144,20 +152,40 @@ public class GmaeManagerScript : MonoBehaviour
     }
 
     // Update is called once per frame
-    /*void Update()
+    void Update()
     {
-
-        //右移動
+        // 移動処理
+        // 右
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            
-            int playerIndex = GetPlayerIndex();
-
-            //移動処理関数化
-            MoveNumber(1, playerIndex, playerIndex + 1);
-            PrintArray();   
+            Vector2Int playerIndex = GetPlayerIndex();
+            // 移動処理関数化
+            MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(1,0));
+          
         }
 
-    }*/
-   
+        // 左
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            Vector2Int playerIndex = GetPlayerIndex();
+            MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(-1, 0));
+        }
+
+        // 上
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            Vector2Int playerIndex = GetPlayerIndex();
+            MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(0, -1));
+        }
+
+        // 下
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            Vector2Int playerIndex = GetPlayerIndex();
+            MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(0, 1));
+        }
+
+
+    }
+
 }
