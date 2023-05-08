@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GmaeManagerScript : MonoBehaviour
@@ -7,6 +8,7 @@ public class GmaeManagerScript : MonoBehaviour
     // 追加
     public GameObject playerPrefab;
     public GameObject boxPrefab;
+    public GameObject clearText;
 
     // レベルデザイン用の配列
     int[,]map;
@@ -30,6 +32,39 @@ public class GmaeManagerScript : MonoBehaviour
          Debug.Log(debugText);
      }*/
 
+    // クリア判定
+    bool IsCleard()
+    {
+        // Vector2Int型の可変長配列の作成
+        List<Vector2Int> goals = new List<Vector2Int>();
+
+        for(int y = 0; y < map.GetLength(0); y++)
+        {
+            for(int x = 0;  x < map.GetLength(1); x++)
+            {
+                // 格納場所か否かを判断
+                if (map[y,x] == 3)
+                {
+                    // 格納場所のインデックスを控えておく
+                    goals.Add(new Vector2Int(x, y));
+                }
+
+            }
+        }
+        
+        // 要素数はgoals.Countで取得
+        for(int i = 0; i < goals.Count; i++)
+        {
+            GameObject f = field[goals[i].y, goals[i].x];
+            if (f == null || f.tag != "Box")
+            {
+                // 一つでも箱がなかったら条件未達成
+                return false;
+
+            }
+        }
+        return true;
+    }
 
      //返り値の型に注意
      Vector2Int GetPlayerIndex()
@@ -111,9 +146,9 @@ public class GmaeManagerScript : MonoBehaviour
         {
 
         {0,0,0,0,1,0,0,0 },
-        {0,0,2,0,0,0,0,0 },
-        {0,0,0,2,0,2,0,0 },
         {0,0,0,0,0,0,0,0 },
+        {0,0,0,2,2,2,0,0 },
+        {0,0,0,3,3,3,0,0 },
         {0,0,0,0,0,0,0,0 },
 
         };
@@ -154,6 +189,10 @@ public class GmaeManagerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        string debug = "clear";
+        // クリア判定
+        IsCleard();
         // 移動処理
         // 右
         if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -169,6 +208,10 @@ public class GmaeManagerScript : MonoBehaviour
         {
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(-1, 0));
+            if (IsCleard())
+            {
+                clearText.SetActive(true);
+            }
         }
 
         // 上
@@ -176,6 +219,10 @@ public class GmaeManagerScript : MonoBehaviour
         {
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(0, -1));
+            if (IsCleard())
+            {
+                clearText.SetActive(true);
+            }
         }
 
         // 下
@@ -183,8 +230,16 @@ public class GmaeManagerScript : MonoBehaviour
         {
             Vector2Int playerIndex = GetPlayerIndex();
             MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(0, 1));
+            if (IsCleard())
+            {
+                clearText.SetActive(true);
+            }
         }
 
+        if (IsCleard())
+        {
+            Debug.Log(debug);
+        }
 
     }
 
