@@ -9,6 +9,7 @@ public class GmaeManagerScript : MonoBehaviour
     public GameObject playerPrefab;
     public GameObject boxPrefab;
     public GameObject clearText;
+    public GameObject goalPrefab;
 
     // レベルデザイン用の配列
     int[,]map;
@@ -173,6 +174,10 @@ public class GmaeManagerScript : MonoBehaviour
                     field[y, x] = Instantiate(boxPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
 
                 }
+                else if (map[y, x] == 3)
+                {
+                    GameObject instance = Instantiate(goalPrefab, new Vector3(x, map.GetLength(0) - y, (float)0.01), Quaternion.identity);
+                }
 
             }
 
@@ -190,7 +195,7 @@ public class GmaeManagerScript : MonoBehaviour
     void Update()
     {
 
-        string debug = "clear";
+       // string debug = "clear";
         // クリア判定
         IsCleard();
         // 移動処理
@@ -236,10 +241,10 @@ public class GmaeManagerScript : MonoBehaviour
             }
         }
 
-        if (IsCleard())
+        /*if (IsCleard())
         {
             Debug.Log(debug);
-        }
+        }*/
 
     }
 
